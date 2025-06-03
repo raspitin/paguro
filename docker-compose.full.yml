@@ -1,0 +1,48 @@
+# 🐚 Paguro - Setup Minimale per Villa Celi
+services:
+  # 🐚 Paguro API - Cervello del receptionist virtuale
+  paguro-api:
+    build: .
+    container_name: paguro-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DB_PATH=/app/data/affitti2025.db
+      - OLLAMA_URL=http://ollama:11434/api/generate
+      - MODEL=llama3.2:1b
+      - PORT=5000
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - ollama
+    networks:
+      - paguro-network
+
+  # 🤖 Ollama - AI Engine per Paguro (CPU ONLY)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: paguro-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_MODELS=llama3.2:1b
+      - OLLAMA_GPU=false
+      - CUDA_VISIBLE_DEVICES=""
+    networks:
+      - paguro-network
+
+# 📡 Network per comunicazione interna
+networks:
+  paguro-network:
+    driver: bridge
+    name: villa-celi-network
+
+# 💾 Volumi persistenti
+volumes:
+  ollama-data:
+    name: paguro-ollama-data
