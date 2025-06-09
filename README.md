@@ -129,7 +129,7 @@ Questo progetto è sotto licenza MIT - vedi file [LICENSE](LICENSE) per dettagli
 ## 👨‍💻 Team Villa Celi
 
 **Andrea**
-- Email: andrea.garozzo@virgilio.it
+- Email: andrea@villaceli.it
 - Località: Villa Celi, Palinuro - Cilento
 
 ## 🔗 Links Utili
