@@ -1,0 +1,88 @@
+# 🐚 Paguro - Dockerfile Backend ROBUSTO
+# Villa Celi - Gestisce qualsiasi struttura file
+
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV DB_PATH=/app/data/affitti2025.db
+ENV OLLAMA_URL=http://ollama:11434/api/generate
+ENV MODEL=llama3.2:1b
+ENV PORT=5000
+ENV HOST=0.0.0.0
+
+# Utente non-root
+RUN groupadd -g 1000 paguro && \
+    useradd -u 1000 -g paguro -m -s /bin/bash paguro
+
+# Dipendenze sistema
+RUN apt-get update && apt-get install -y \
+    gcc sqlite3 curl dumb-init \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Requirements
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Directory
+RUN mkdir -p /app/data /app/logs /app/cache && \
+    chown -R paguro:paguro /app
+
+# COPIA TUTTO IL CONTENUTO (strategia sicura)
+COPY --chown=paguro:paguro . .
+
+# Script di avvio INTELLIGENTE che trova il file Python
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "🐚 Avvio Paguro per Villa Celi..."\n\
+echo "📍 Località: Palinuro, Cilento"\n\
+echo "🌐 Frontend: $VILLA_CELI_FRONTEND"\n\
+echo "📡 API: $API_BASE_URL"\n\
+echo "🗄️ Database: $DB_PATH"\n\
+echo "🤖 Ollama: $OLLAMA_URL"\n\
+echo ""\n\
+echo "🔍 Cercando file Python principale..."\n\
+ls -la /app/ | grep "\.py"\n\
+echo ""\n\
+\n\
+# STRATEGIA: Cerca file Python in ordine di priorità\n\
+MAIN_FILE=""\n\
+\n\
+if [ -f "/app/main.py" ]; then\n\
+    MAIN_FILE="main.py"\n\
+    echo "✅ Trovato: main.py"\n\
+elif [ -f "/app/wordpress_chatbot_api.py" ]; then\n\
+    MAIN_FILE="wordpress_chatbot_api.py"\n\
+    echo "✅ Trovato: wordpress_chatbot_api.py"\n\
+elif [ -f "/app/api/main.py" ]; then\n\
+    MAIN_FILE="api/main.py"\n\
+    echo "✅ Trovato: api/main.py"\n\
+else\n\
+    echo "❌ ERRORE: Nessun file Python principale trovato!"\n\
+    echo "📋 File disponibili:"\n\
+    find /app -name "*.py" -type f | head -10\n\
+    echo ""\n\
+    echo "💡 File Python richiesti:"\n\
+    echo "   - main.py"\n\
+    echo "   - wordpress_chatbot_api.py"\n\
+    echo "   - api/main.py"\n\
+    exit 1\n\
+fi\n\
+\n\
+echo "🚀 Avvio Paguro con $MAIN_FILE..."\n\
+echo ""\n\
+exec python "$MAIN_FILE"' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh && \
+    chown paguro:paguro /app/entrypoint.sh
+
+USER paguro
+EXPOSE $PORT
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:$PORT/api/health || exit 1
+
+VOLUME ["/app/data", "/app/logs"]
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/app/entrypoint.sh"]

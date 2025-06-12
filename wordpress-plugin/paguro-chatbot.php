@@ -33,7 +33,7 @@ class AppartamentiChatbot {
         // CSS del chatbot
         wp_enqueue_style(
             'appartamenti-chatbot-css',
-            plugin_dir_url(__FILE__) . 'assets/chatbot.css',
+            plugin_dir_url(__FILE__) . 'assets/css/chatbot.css',
             array(),
             '2.2.0' // Incrementata per Paguro
         );
@@ -41,7 +41,7 @@ class AppartamentiChatbot {
         // JavaScript del chatbot
         wp_enqueue_script(
             'appartamenti-chatbot-js',
-            plugin_dir_url(__FILE__) . 'assets/chatbot.js',
+            plugin_dir_url(__FILE__) . 'assets/js/chatbot.js',
             array('jquery'),
             '1.2.0', // Incrementata
             true
@@ -51,7 +51,7 @@ class AppartamentiChatbot {
         if (is_page('prenotazione')) {
             wp_enqueue_script(
                 'booking-populate-js',
-                plugin_dir_url(__FILE__) . 'assets/booking-populate.js',
+                plugin_dir_url(__FILE__) . 'assets/js/booking-populate.js',
                 array('jquery'),
                 '1.0.0',
                 true

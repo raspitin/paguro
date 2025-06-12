@@ -1,0 +1,20 @@
+# WordPress
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Logs
+*.log
+
+# Development
+node_modules/
+.vscode/
+.idea/
+
+# Compiled assets
+*.min.css
+*.min.js
